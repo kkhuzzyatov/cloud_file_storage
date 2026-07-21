@@ -1,11 +1,7 @@
 package cloud_file_storage.main.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.UUID;
-
 import lombok.*;
 
 @Entity
@@ -17,7 +13,9 @@ import lombok.*;
 @Builder
 public class User {
 
-  @Id private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @Column(nullable = false, unique = true)
   private String username;
