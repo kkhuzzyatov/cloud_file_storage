@@ -51,11 +51,12 @@ public class UserService {
   }
 
   public void signOut(String token) {
-    mockTokenRepository.deleteToken(UUID.fromString(token));
+    mockTokenRepository.deleteToken(UUID.fromString(token.replaceFirst("^Bearer\\s+", "")));
   }
 
   public User me(String token) {
-    UUID userId = mockTokenRepository.getUserId(UUID.fromString(token));
+    UUID userId =
+        mockTokenRepository.getUserId(UUID.fromString(token.replaceFirst("^Bearer\\s+", "")));
     User user =
         userRepository
             .findById(userId)
