@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -28,6 +30,25 @@ public class GlobalExceptionHandler {
         .log("Ошибка некорректного аргумента");
 
     return buildResponse(ex, HttpStatus.BAD_REQUEST, "Некорректный запрос");
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException ex) {
+
+    log.atError()
+        .setCause(ex)
+        .addKeyValue("исключение", ex.getClass().getSimpleName())
+        .addKeyValue("сообщение", ex.getMessage())
+        .log("Ошибка некорректного аргумента");
+
+    String message =
+        ex.getBindingResult().getFieldErrors().stream()
+            .findFirst()
+            .map(FieldError::getDefaultMessage)
+            .orElse("Некорректный запрос");
+
+    return buildResponse(ex, HttpStatus.BAD_REQUEST, message);
   }
 
   @ExceptionHandler(UserAlreadyExistsException.class)

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class AuthController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @PostMapping("/auth/sign-up")
-  public ResponseEntity<ResponseDto> signUp(@RequestBody RequestDto requestDto) {
+  public ResponseEntity<ResponseDto> signUp(@Valid @RequestBody RequestDto requestDto) {
     String token = userService.signUp(requestDto.username(), requestDto.password());
     return ResponseEntity.status(201).body(ResponseDto.builder().token(token).build());
   }
@@ -40,7 +41,7 @@ public class AuthController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @PostMapping("/auth/sign-in")
-  public ResponseEntity<ResponseDto> signIn(@RequestBody RequestDto requestDto) {
+  public ResponseEntity<ResponseDto> signIn(@Valid @RequestBody RequestDto requestDto) {
     String token = userService.signIn(requestDto.username(), requestDto.password());
     return ResponseEntity.ok().body(ResponseDto.builder().token(token).build());
   }
