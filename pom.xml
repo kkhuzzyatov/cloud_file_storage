@@ -10,11 +10,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>parnas-test-task</groupId>
+    <groupId>cloud-file-storage</groupId>
     <artifactId>parent</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <name>parnas-test-task-parent</name>
+    <name>parent</name>
 
     <url/>
     <licenses>
