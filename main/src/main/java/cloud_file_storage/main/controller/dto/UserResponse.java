@@ -1,6 +1,7 @@
 package cloud_file_storage.main.controller.dto;
 
+import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record ResponseDto(String token) {}
+public record UserResponse(UUID id, String username) {}

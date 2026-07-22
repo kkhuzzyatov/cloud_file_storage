@@ -1,7 +1,8 @@
 package cloud_file_storage.main.controller;
 
-import cloud_file_storage.main.controller.dto.RequestDto;
-import cloud_file_storage.main.controller.dto.ResponseDto;
+import cloud_file_storage.main.controller.dto.AuthRequest;
+import cloud_file_storage.main.controller.dto.TokenResponse;
+import cloud_file_storage.main.controller.dto.UserResponse;
 import cloud_file_storage.main.service.UserService;
 import cloud_file_storage.main.user.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,9 +29,9 @@ public class AuthController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @PostMapping("/auth/sign-up")
-  public ResponseEntity<ResponseDto> signUp(@Valid @RequestBody RequestDto requestDto) {
-    String token = userService.signUp(requestDto.username(), requestDto.password());
-    return ResponseEntity.status(201).body(ResponseDto.builder().token(token).build());
+  public ResponseEntity<TokenResponse> signUp(@Valid @RequestBody AuthRequest authRequest) {
+    String token = userService.signUp(authRequest.username(), authRequest.password());
+    return ResponseEntity.status(201).body(TokenResponse.builder().token(token).build());
   }
 
   @Operation(summary = "Авторизация")
@@ -41,9 +42,9 @@ public class AuthController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @PostMapping("/auth/sign-in")
-  public ResponseEntity<ResponseDto> signIn(@Valid @RequestBody RequestDto requestDto) {
-    String token = userService.signIn(requestDto.username(), requestDto.password());
-    return ResponseEntity.ok().body(ResponseDto.builder().token(token).build());
+  public ResponseEntity<TokenResponse> signIn(@Valid @RequestBody AuthRequest authRequest) {
+    String token = userService.signIn(authRequest.username(), authRequest.password());
+    return ResponseEntity.ok().body(TokenResponse.builder().token(token).build());
   }
 
   @Operation(summary = "Выход из аккаунта")
@@ -65,8 +66,10 @@ public class AuthController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping("/user/me")
-  public ResponseEntity<User> getCurrentUser(@RequestHeader("Authorization") String token) {
+  public ResponseEntity<UserResponse> getCurrentUser(@RequestHeader("Authorization") String token) {
     User user = userService.me(token);
-    return ResponseEntity.ok(user);
+    UserResponse userResponse =
+        UserResponse.builder().id(user.getId()).username(user.getUsername()).build();
+    return ResponseEntity.ok(userResponse);
   }
 }
