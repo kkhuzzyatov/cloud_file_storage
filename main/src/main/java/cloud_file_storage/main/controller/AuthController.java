@@ -2,9 +2,7 @@ package cloud_file_storage.main.controller;
 
 import cloud_file_storage.main.controller.dto.AuthRequest;
 import cloud_file_storage.main.controller.dto.TokenResponse;
-import cloud_file_storage.main.controller.dto.UserResponse;
 import cloud_file_storage.main.service.UserService;
-import cloud_file_storage.main.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "Регистрация и авторизация")
 public class AuthController {
@@ -28,7 +26,7 @@ public class AuthController {
     @ApiResponse(responseCode = "409", description = "username занят"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @PostMapping("/auth/sign-up")
+  @PostMapping("/sign-up")
   public ResponseEntity<TokenResponse> signUp(@Valid @RequestBody AuthRequest authRequest) {
     String token = userService.signUp(authRequest.username(), authRequest.password());
     return ResponseEntity.status(201).body(TokenResponse.builder().token(token).build());
@@ -41,7 +39,7 @@ public class AuthController {
     @ApiResponse(responseCode = "401", description = "неверные данные"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @PostMapping("/auth/sign-in")
+  @PostMapping("/sign-in")
   public ResponseEntity<TokenResponse> signIn(@Valid @RequestBody AuthRequest authRequest) {
     String token = userService.signIn(authRequest.username(), authRequest.password());
     return ResponseEntity.ok().body(TokenResponse.builder().token(token).build());
@@ -53,23 +51,9 @@ public class AuthController {
     @ApiResponse(responseCode = "401", description = "не авторизован"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @PostMapping("/auth/sign-out")
+  @PostMapping("/sign-out")
   public ResponseEntity<Void> signOut(@RequestHeader("Authorization") String token) {
     userService.signOut(token);
     return ResponseEntity.noContent().build();
-  }
-
-  @Operation(summary = "Текущий пользователь")
-  @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "данные пользователя получены"),
-    @ApiResponse(responseCode = "401", description = "не авторизован"),
-    @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
-  })
-  @GetMapping("/user/me")
-  public ResponseEntity<UserResponse> getCurrentUser(@RequestHeader("Authorization") String token) {
-    User user = userService.me(token);
-    UserResponse userResponse =
-        UserResponse.builder().id(user.getId()).username(user.getUsername()).build();
-    return ResponseEntity.ok(userResponse);
   }
 }
