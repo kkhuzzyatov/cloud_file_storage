@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = os.getenv("BASE_URL")
+AUTH_URL = os.getenv("AUTH_URL")
 
 
-class ApiClient:
+class ApiAuthClient:
 
     def signup(self, username: str, password: str):
         return requests.post(
-            f"{BASE_URL}/api/auth/sign-up",
+            f"{AUTH_URL}/sign-up",
             json={
                 "username": username,
                 "password": password,
@@ -22,7 +22,7 @@ class ApiClient:
 
     def signin(self, username: str, password: str):
         return requests.post(
-            f"{BASE_URL}/api/auth/sign-in",
+            f"{AUTH_URL}/sign-in",
             json={
                 "username": username,
                 "password": password,
@@ -37,7 +37,7 @@ class ApiClient:
             headers["Authorization"] = f"Bearer {token}"
 
         return requests.get(
-            f"{BASE_URL}/api/user/me",
+            f"{AUTH_URL}/api/user/me",
             headers=headers,
             timeout=10,
         )

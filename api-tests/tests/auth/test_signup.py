@@ -1,11 +1,11 @@
 import uuid
 import pytest
 
-def test_signup_success(api):
+def test_signup_success(auth_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
-    response = api.signup(username, password)
+    response = auth_api.signup(username, password)
 
     assert response.status_code == 201
 
@@ -18,11 +18,11 @@ def test_signup_success(api):
     uuid.UUID(body["token"])
 
 
-def test_signup_duplicate(api):
+def test_signup_duplicate(auth_api):
     username = f"user_{uuid.uuid4().hex}"
 
-    api.signup(username, "password123")
-    response = api.signup(username, "password123")
+    auth_api.signup(username, "password123")
+    response = auth_api.signup(username, "password123")
 
     assert response.status_code == 409
 
@@ -35,7 +35,7 @@ def test_signup_duplicate(api):
         ("test_user_2", ""),
     ],
 )
-def test_signup_validation(api, username, password):
-    response = api.signup(username, password)
+def test_signup_validation(auth_api, username, password):
+    response = auth_api.signup(username, password)
 
     assert response.status_code == 400

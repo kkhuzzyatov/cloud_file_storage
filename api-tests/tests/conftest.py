@@ -1,8 +1,12 @@
 import pytest
 
-from client import ApiClient
-
+from auth_client import ApiAuthClient
+from user_client import ApiUserClient
 
 @pytest.fixture
-def api():
-    return ApiClient()
+def auth_api():
+    return ApiAuthClient()
+
+@pytest.fixture
+def user_api():
+    return ApiUserClient()

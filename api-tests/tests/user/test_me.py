@@ -1,26 +1,25 @@
 import uuid
 
-def test_me_unauthorized(api):
-    response = api.me()
-
+def test_me_unauthorized(user_api):
+    response = user_api.me()
     assert response.status_code == 401
 
-def test_me_success(api):
+def test_me_success(auth_api, user_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
     # Регистрация
-    response = api.signup(username, password)
+    response = auth_api.signup(username, password)
     assert response.status_code == 201
 
     # Вход
-    response = api.signin(username, password)
+    response = auth_api.signin(username, password)
     assert response.status_code == 200
 
     token = response.json()["token"]
 
     # Получение информации о пользователе
-    response = api.me(token)
+    response = user_api.me(token)
 
     assert response.status_code == 200
 
