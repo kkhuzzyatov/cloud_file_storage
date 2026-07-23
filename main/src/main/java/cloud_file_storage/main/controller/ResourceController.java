@@ -1,5 +1,6 @@
 package cloud_file_storage.main.controller;
 
+import cloud_file_storage.main.controller.dto.ResourceInformationResponse;
 import cloud_file_storage.main.resource.Resource;
 import cloud_file_storage.main.resource.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,38 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Resource", description = "Управление ресурсами")
 public class ResourceController {
   private final ResourceService resourceService;
+
+  @Operation(summary = "Загрузка")
+  @ApiResponses({
+    @ApiResponse(responseCode = "201", description = "ресурс загружен"),
+    @ApiResponse(responseCode = "400", description = "невалидное тело запроса"),
+    @ApiResponse(responseCode = "401", description = "пользователь не авторизован"),
+    @ApiResponse(responseCode = "409", description = "файл уже существует"),
+    @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
+  })
+  @PostMapping("/resource")
+  public ResponseEntity<?> upload(
+      @RequestParam String path, @RequestParam("file") MultipartFile file) throws IOException {
+    byte[] bytes = file.getBytes();
+    String name = file.getOriginalFilename();
+    String[] nameParts = name.split("/");
+    if (nameParts.length > 1) {
+      for (int i = 0; i < nameParts.length - 2; i++) {
+        path += nameParts[i];
+      }
+      name = nameParts[nameParts.length - 1];
+    }
+    Resource resource = new Resource(name, bytes);
+    ResourceInformationResponse resourceInformationResponse =
+        ResourceInformationResponse.builder()
+            .path(path)
+            .name(name)
+            .size(bytes.length)
+            .type("FILE")
+            .build();
+    resourceService.createResource(path, resource);
+    return ResponseEntity.status(201).body(List.of(resourceInformationResponse));
+  }
 
   @Operation(summary = "Получение информации о ресурсе")
   @ApiResponses({
@@ -86,31 +120,6 @@ public class ResourceController {
   @GetMapping("/resource/search")
   public ResponseEntity<?> search(@RequestParam String query) {
     return ResponseEntity.ok(resourceService.search(query));
-  }
-
-  @Operation(summary = "Загрузка")
-  @ApiResponses({
-    @ApiResponse(responseCode = "201", description = "ресурс загружен"),
-    @ApiResponse(responseCode = "400", description = "невалидное тело запроса"),
-    @ApiResponse(responseCode = "401", description = "пользователь не авторизован"),
-    @ApiResponse(responseCode = "409", description = "файл уже существует"),
-    @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
-  })
-  @PostMapping("/resource")
-  public ResponseEntity<?> upload(
-      @RequestParam String path, @RequestParam("file") MultipartFile file) throws IOException {
-    byte[] bytes = file.getBytes();
-    String name = file.getName();
-    String[] nameParts = name.split("/");
-    if (nameParts.length > 1) {
-      for (int i = 0; i < nameParts.length - 2; i++) {
-        path += nameParts[i];
-      }
-      name = nameParts[nameParts.length - 1];
-    }
-    Resource resource = new Resource(name, bytes);
-    resourceService.createResource(path, resource);
-    return ResponseEntity.status(201).build();
   }
 
   @Operation(summary = "Папки")
