@@ -3,6 +3,7 @@ package cloud_file_storage.main.controller;
 import cloud_file_storage.main.controller.dto.ResourceInformationResponse;
 import cloud_file_storage.main.resource.Resource;
 import cloud_file_storage.main.resource.ResourceService;
+import cloud_file_storage.main.utils.ResourceToMultipartFileConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ResourceController {
   private final ResourceService resourceService;
   private final PathValidator pathValidator;
+  private final ResourceToMultipartFileConverter resourceConverter;
 
   @Operation(summary = "Загрузка")
   @ApiResponses({
@@ -104,7 +106,7 @@ public class ResourceController {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
-    return ResponseEntity.ok(resourceService.getResource(path));
+    return ResponseEntity.ok(resourceConverter.convert(resourceService.getResource(path)));
   }
 
   @Operation(summary = "Переименование/перемещение ресурса")

@@ -93,6 +93,16 @@ class ApiResourceClient:
             },
             timeout=10,
         )
+        
+    def download(self, path: str, token: str):
+        return requests.get(
+            f"{RESOURCE_URL}/download",
+            params={"path": path},
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
 
     @staticmethod
     def _headers(token: str | None):
