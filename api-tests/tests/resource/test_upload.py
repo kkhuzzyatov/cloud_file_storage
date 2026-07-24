@@ -44,3 +44,66 @@ def test_upload_file(auth_api, resource_api):
         "size": len(content),
         "type": "FILE",
     }
+    
+def test_upload_duplicate_file(auth_api, resource_api):
+    username = f"user_{uuid.uuid4().hex}"
+    password = "password123"
+
+    # Регистрация
+    response = auth_api.signup(username, password)
+    assert response.status_code == 201
+
+    # Авторизация
+    response = auth_api.signin(username, password)
+    assert response.status_code == 200
+
+    token = response.json()["token"]
+
+    # Генерируем файл
+    file_name = f"{uuid.uuid4().hex}.txt"
+    content = uuid.uuid4().hex.encode("utf-8")
+
+    # Генерируем папку
+    folder_name = f"folder_{uuid.uuid4().hex}"
+
+    # Первая загрузка
+    response = resource_api.upload(
+        path=folder_name,
+        file_name=file_name,
+        content=content,
+        token=token,
+    )
+
+    assert response.status_code == 201
+
+    # Повторная загрузка того же файла
+    response = resource_api.upload(
+        path=folder_name,
+        file_name=file_name,
+        content=content,
+        token=token,
+    )
+
+    assert response.status_code == 409
+    
+def test_upload_without_body(auth_api, resource_api):
+    username = f"user_{uuid.uuid4().hex}"
+    password = "password123"
+
+    # Sign up
+    response = auth_api.signup(username, password)
+    assert response.status_code == 201
+
+    # Sign in
+    response = auth_api.signin(username, password)
+    assert response.status_code == 200
+
+    token = response.json()["token"]
+
+    # Send request with auth token but without file body
+    response = resource_api.upload_without_body(
+        path=f"folder_{uuid.uuid4().hex}",
+        token=token,
+    )
+
+    assert response.status_code == 400

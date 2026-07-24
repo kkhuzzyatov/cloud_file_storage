@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +30,7 @@ public class ResourceController {
     @ApiResponse(responseCode = "409", description = "файл уже существует"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @PostMapping("/resource")
+  @PostMapping(value = "/resource", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> upload(
       @RequestParam String path, @RequestParam("file") MultipartFile file) throws IOException {
     byte[] bytes = file.getBytes();

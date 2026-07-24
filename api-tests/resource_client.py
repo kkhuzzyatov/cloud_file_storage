@@ -65,6 +65,24 @@ class ApiResourceClient:
             },
             timeout=10,
         )
+        
+    def get(self, path: str, token: str):
+        return requests.get(
+            RESOURCE_URL,
+            params={"path": path},
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
+        
+    def upload_without_body(self, path, token):
+        return requests.post(
+            RESOURCE_URL,
+            params={"path": path},
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=10,
+        )
 
     @staticmethod
     def _headers(token: str | None):
