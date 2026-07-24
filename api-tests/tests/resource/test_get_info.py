@@ -79,3 +79,26 @@ def test_upload_invalid_path(auth_api, resource_api, path):
     )
 
     assert response.status_code == 400
+    
+# 404
+def test_get_resource_info_not_found(auth_api, resource_api):
+    username = f"user_{uuid.uuid4().hex}"
+    password = "password123"
+
+    # Sign up
+    response = auth_api.signup(username, password)
+    assert response.status_code == 201
+
+    # Sign in
+    response = auth_api.signin(username, password)
+    assert response.status_code == 200
+
+    token = response.json()["token"]
+
+    # Request information for a non-existent resource
+    response = resource_api.get(
+        path=f"folder_{uuid.uuid4().hex}/file.txt",
+        token=token,
+    )
+
+    assert response.status_code == 404
