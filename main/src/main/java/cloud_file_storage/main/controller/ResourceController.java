@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Resource", description = "Управление ресурсами")
 public class ResourceController {
   private final ResourceService resourceService;
+  private final PathValidator pathValidator;
 
   @Operation(summary = "Загрузка")
   @ApiResponses({
@@ -33,6 +34,9 @@ public class ResourceController {
   @PostMapping(value = "/resource", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> upload(
       @RequestParam String path, @RequestParam("file") MultipartFile file) throws IOException {
+    if (!pathValidator.isPathValid(path)) {
+      return ResponseEntity.status(400).body("параметр пути не корректен");
+    }
     byte[] bytes = file.getBytes();
     String name = file.getOriginalFilename();
     String[] nameParts = name.split("/");
@@ -64,6 +68,9 @@ public class ResourceController {
   })
   @GetMapping("/resource")
   public ResponseEntity<?> getInfo(@RequestParam String path) {
+    if (!pathValidator.isPathValid(path)) {
+      return ResponseEntity.status(400).body("параметр path не корректен");
+    }
     return ResponseEntity.ok(resourceService.getInfo(path));
   }
 
@@ -77,6 +84,9 @@ public class ResourceController {
   })
   @DeleteMapping("/resource")
   public ResponseEntity<?> delete(@RequestParam String path) {
+    if (!pathValidator.isPathValid(path)) {
+      return ResponseEntity.status(400).body("параметр path не корректен");
+    }
     resourceService.delete(path);
     return ResponseEntity.noContent().build();
   }
@@ -91,6 +101,9 @@ public class ResourceController {
   })
   @GetMapping("/resource/download")
   public ResponseEntity<?> download(@RequestParam String path) {
+    if (!pathValidator.isPathValid(path)) {
+      return ResponseEntity.status(400).body("параметр path не корректен");
+    }
     return ResponseEntity.ok(resourceService.getResource(path));
   }
 
@@ -105,6 +118,12 @@ public class ResourceController {
   })
   @PostMapping("/resource/move")
   public ResponseEntity<?> move(@RequestParam String from, @RequestParam String to) {
+    if (!pathValidator.isPathValid(from)) {
+      return ResponseEntity.status(400).body("параметр from не корректен");
+    }
+    if (!pathValidator.isPathValid(to)) {
+      return ResponseEntity.status(400).body("параметр to не корректен");
+    }
     resourceService.move(from, to);
     return ResponseEntity.status(200).build();
   }
@@ -133,6 +152,9 @@ public class ResourceController {
   })
   @GetMapping("/directory")
   public ResponseEntity<?> getDirectoryInfo(@RequestParam String path) {
+    if (!pathValidator.isPathValid(path)) {
+      return ResponseEntity.status(400).body("параметр path не корректен");
+    }
     return ResponseEntity.ok(resourceService.getInfo(path));
   }
 
@@ -147,6 +169,9 @@ public class ResourceController {
   })
   @PostMapping("/directory")
   public ResponseEntity<?> createDirectory(@RequestParam String path) {
+    if (!pathValidator.isPathValid(path)) {
+      return ResponseEntity.status(400).body("параметр path не корректен");
+    }
     resourceService.createDirectory(path);
     return ResponseEntity.status(201).build();
   }
