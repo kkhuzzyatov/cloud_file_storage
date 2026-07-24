@@ -68,7 +68,8 @@ def test_upload_without_body(auth_api, resource_api):
     )
 
     assert response.status_code == 400
-
+    
+# 400
 @pytest.mark.parametrize(
     "path",
     [
@@ -96,8 +97,17 @@ def test_upload_invalid_path(auth_api, resource_api, path):
         content=b"test",
         token=token,
     )
-
     assert response.status_code == 400
+
+# 401
+def test_upload_unauthorized(resource_api):
+    response = resource_api.upload(
+        path="folder",
+        file_name="file.txt",
+        content=b"test",
+        token="invalid_token",
+    )
+    assert response.status_code == 401
 
 # 409       
 def test_upload_duplicate_file(auth_api, resource_api):

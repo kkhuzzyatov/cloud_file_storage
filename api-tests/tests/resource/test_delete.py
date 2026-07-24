@@ -1,8 +1,8 @@
 import uuid
 import pytest
 
-# 200
-def test_get_resource_info(auth_api, resource_api):
+# 204
+def test_delete_resource(auth_api, resource_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -16,11 +16,8 @@ def test_get_resource_info(auth_api, resource_api):
 
     token = response.json()["token"]
 
-    # Generate file
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
-
-    # Generate folder
     folder_name = f"folder_{uuid.uuid4().hex}"
 
     # Upload file
@@ -32,23 +29,14 @@ def test_get_resource_info(auth_api, resource_api):
     )
     assert response.status_code == 201
 
-    # Get resource information
-    response = resource_api.get(
-        path=(folder_name + "/" + file_name),
+    # Delete resource
+    response = resource_api.delete(
+        path=f"{folder_name}/{file_name}",
         token=token,
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 204
 
-    body = response.json()
-
-    assert body == {
-        "path": (folder_name + "/" + file_name),
-        "name": file_name,
-        "size": len(content),
-        "type": "FILE",
-    }
-    
 # 400
 @pytest.mark.parametrize(
     "path",
@@ -57,7 +45,7 @@ def test_get_resource_info(auth_api, resource_api):
         "documents/\0/file.txt",
     ],
 )
-def test_upload_invalid_path(auth_api, resource_api, path):
+def test_delete_resource_invalid_path(auth_api, resource_api, path):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -71,25 +59,23 @@ def test_upload_invalid_path(auth_api, resource_api, path):
 
     token = response.json()["token"]
 
-    response = resource_api.upload(
+    response = resource_api.delete(
         path=path,
-        file_name=f"{uuid.uuid4().hex}.txt",
-        content=b"test",
         token=token,
     )
 
     assert response.status_code == 400
-    
+
 # 401
-def test_get_resource_info_unauthorized(resource_api):
-    response = resource_api.get(
+def test_delete_resource_unauthorized(resource_api):
+    response = resource_api.delete(
         path="folder/file.txt",
         token="invalid_token",
     )
     assert response.status_code == 401
-    
+
 # 404
-def test_get_resource_info_not_found(auth_api, resource_api):
+def test_delete_resource_not_found(auth_api, resource_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -103,8 +89,7 @@ def test_get_resource_info_not_found(auth_api, resource_api):
 
     token = response.json()["token"]
 
-    # Request information for a non-existent resource
-    response = resource_api.get(
+    response = resource_api.delete(
         path=f"folder_{uuid.uuid4().hex}/file.txt",
         token=token,
     )

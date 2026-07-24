@@ -83,6 +83,16 @@ class ApiResourceClient:
             headers={"Authorization": f"Bearer {token}"},
             timeout=10,
         )
+        
+    def delete(self, path: str, token: str):
+        return requests.delete(
+            RESOURCE_URL,
+            params={"path": path},
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
 
     @staticmethod
     def _headers(token: str | None):
