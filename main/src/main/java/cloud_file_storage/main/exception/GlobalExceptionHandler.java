@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
+  public ResponseEntity<Map<String, String>> handleHttpMediaTypeNotSupportedException(
       IllegalArgumentException ex) {
     log.atError()
         .setCause(ex)
@@ -30,6 +31,42 @@ public class GlobalExceptionHandler {
         .log("Ошибка некорректного аргумента");
 
     return buildResponse(ex, HttpStatus.BAD_REQUEST, "Некорректный запрос");
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<Map<String, String>> handleHttpMediaTypeNotSupportedException(
+      HttpMediaTypeNotSupportedException ex) {
+    log.atError()
+        .setCause(ex)
+        .addKeyValue("исключение", ex.getClass().getSimpleName())
+        .addKeyValue("сообщение", ex.getMessage())
+        .log("Content-Type is not supported");
+
+    return buildResponse(ex, HttpStatus.BAD_REQUEST, "Content-Type is not supported");
+  }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<Map<String, String>> handleResourceNotFoundException(
+      ResourceNotFoundException ex) {
+    log.atError()
+        .setCause(ex)
+        .addKeyValue("исключение", ex.getClass().getSimpleName())
+        .addKeyValue("сообщение", ex.getMessage())
+        .log("Ресурс не найден");
+
+    return buildResponse(ex, HttpStatus.NOT_FOUND, "Ресурс не найден");
+  }
+
+  @ExceptionHandler(FileIsAlreadyExistException.class)
+  public ResponseEntity<Map<String, String>> handleFileIsAlreadyExistException(
+      FileIsAlreadyExistException ex) {
+    log.atError()
+        .setCause(ex)
+        .addKeyValue("исключение", ex.getClass().getSimpleName())
+        .addKeyValue("сообщение", ex.getMessage())
+        .log("Файл с таким именем уже существует");
+
+    return buildResponse(ex, HttpStatus.CONFLICT, "Файл с таким именем уже существует");
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
