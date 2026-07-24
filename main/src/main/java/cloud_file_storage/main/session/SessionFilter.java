@@ -26,10 +26,8 @@ public class SessionFilter extends OncePerRequestFilter {
     String header = request.getHeader("Authorization");
 
     if (header != null && header.startsWith("Bearer ")) {
-      System.out.println("auth header: " + header);
       UUID userId =
           mockTokenRepository.getUserId(UUID.fromString(header.replaceFirst("^Bearer\\s+", "")));
-      System.out.println("user id from filter: " + userId);
       UsernamePasswordAuthenticationToken auth =
           new UsernamePasswordAuthenticationToken(
               userId, null, List.of(new SimpleGrantedAuthority("USER")));
