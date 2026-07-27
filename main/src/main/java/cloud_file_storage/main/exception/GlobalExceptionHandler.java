@@ -250,7 +250,8 @@ public class GlobalExceptionHandler {
         .addKeyValue("сообщение", ex.getMessage())
         .log("Непредвиденная ошибка");
 
-    return buildResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Непредвиденная ошибка. Попробуйте позже");
+    return buildResponse(
+        ex, HttpStatus.INTERNAL_SERVER_ERROR, "Непредвиденная ошибка. Попробуйте позже");
   }
 
   private ResponseEntity<Map<String, String>> buildResponse(

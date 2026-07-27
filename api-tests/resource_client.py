@@ -1,5 +1,4 @@
 import os
-import io
 
 import requests
 from dotenv import load_dotenv
@@ -7,8 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 RESOURCE_URL = os.getenv("RESOURCE_URL")
-DIRECTORY_URL = os.getenv("DIRECTORY_URL")
-
 
 class ApiResourceClient:
 
@@ -122,26 +119,6 @@ class ApiResourceClient:
         return requests.get(
             f"{RESOURCE_URL}/search",
             params={"query": query},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
-        )
-        
-    def directory(self, path: str, token: str):
-        return requests.get(
-            DIRECTORY_URL,
-            params={"path": path},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
-        )
-        
-    def create_directory(self, path: str, token: str):
-        return requests.post(
-            DIRECTORY_URL,
-            params={"path": path},
             headers={
                 "Authorization": f"Bearer {token}",
             },

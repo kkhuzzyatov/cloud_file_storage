@@ -3,6 +3,7 @@ import pytest
 from auth_client import ApiAuthClient
 from user_client import ApiUserClient
 from resource_client import ApiResourceClient
+from directory_client import ApiDirectoryClient
 
 @pytest.fixture
 def auth_api():
@@ -15,3 +16,7 @@ def user_api():
 @pytest.fixture
 def resource_api():
     return ApiResourceClient()
+
+@pytest.fixture
+def directory_api():
+    return ApiDirectoryClient()

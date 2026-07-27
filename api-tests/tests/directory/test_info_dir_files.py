@@ -3,7 +3,7 @@ import pytest
 
 
 # 200
-def test_get_directory_content(auth_api, resource_api):
+def test_get_directory_content(auth_api, resource_api, directory_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -27,7 +27,7 @@ def test_get_directory_content(auth_api, resource_api):
     )
     assert response.status_code == 201
 
-    response = resource_api.directory(
+    response = directory_api.directory(
         path=folder,
         token=token,
     )
@@ -58,7 +58,7 @@ def test_get_directory_content(auth_api, resource_api):
         "documents/\0/folder",
     ],
 )
-def test_get_directory_invalid_path(auth_api, resource_api, path):
+def test_get_directory_invalid_path(auth_api, directory_api, path):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -70,7 +70,7 @@ def test_get_directory_invalid_path(auth_api, resource_api, path):
 
     token = response.json()["token"]
 
-    response = resource_api.directory(
+    response = directory_api.directory(
         path=path,
         token=token,
     )
@@ -79,8 +79,8 @@ def test_get_directory_invalid_path(auth_api, resource_api, path):
 
 
 # 401
-def test_get_directory_unauthorized(resource_api):
-    response = resource_api.directory(
+def test_get_directory_unauthorized(directory_api):
+    response = directory_api.directory(
         path="folder",
         token="invalid_token",
     )
@@ -89,7 +89,7 @@ def test_get_directory_unauthorized(resource_api):
 
 
 # 404
-def test_get_directory_not_found(auth_api, resource_api):
+def test_get_directory_not_found(auth_api, directory_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -101,7 +101,7 @@ def test_get_directory_not_found(auth_api, resource_api):
 
     token = response.json()["token"]
 
-    response = resource_api.directory(
+    response = directory_api.directory(
         path=f"folder_{uuid.uuid4().hex}",
         token=token,
     )

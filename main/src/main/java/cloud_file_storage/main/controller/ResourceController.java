@@ -3,7 +3,6 @@ package cloud_file_storage.main.controller;
 import cloud_file_storage.main.controller.dto.ResourceInformationResponse;
 import cloud_file_storage.main.resource.Resource;
 import cloud_file_storage.main.resource.ResourceService;
-import cloud_file_storage.main.utils.ResourceToMultipartFileConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,13 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/resource")
 @RequiredArgsConstructor
 @Tag(name = "Resource", description = "Управление ресурсами")
 public class ResourceController {
   private final ResourceService resourceService;
   private final PathValidator pathValidator;
-  private final ResourceToMultipartFileConverter resourceConverter;
 
   @Operation(summary = "Загрузка")
   @ApiResponses({
@@ -33,7 +31,7 @@ public class ResourceController {
     @ApiResponse(responseCode = "409", description = "файл уже существует"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @PostMapping(value = "/resource", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> upload(
       @RequestParam String path, @RequestParam("file") MultipartFile file) throws IOException {
     if (!pathValidator.isPathValid(path)) {
@@ -68,7 +66,7 @@ public class ResourceController {
     @ApiResponse(responseCode = "404", description = "ресурс не найден"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @GetMapping("/resource")
+  @GetMapping
   public ResponseEntity<?> getInfo(@RequestParam String path) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
@@ -84,7 +82,7 @@ public class ResourceController {
     @ApiResponse(responseCode = "404", description = "ресурс не найден"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @DeleteMapping("/resource")
+  @DeleteMapping
   public ResponseEntity<?> delete(@RequestParam String path) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
@@ -101,7 +99,7 @@ public class ResourceController {
     @ApiResponse(responseCode = "404", description = "ресурс не найден"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @GetMapping("/resource/download")
+  @GetMapping("/download")
   public ResponseEntity<?> download(@RequestParam String path) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
@@ -118,7 +116,7 @@ public class ResourceController {
     @ApiResponse(responseCode = "409", description = "ресурс, лежащий по пути to уже существует"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @PostMapping("/resource/move")
+  @PostMapping("/move")
   public ResponseEntity<?> move(@RequestParam String from, @RequestParam String to) {
     if (!pathValidator.isPathValid(from)) {
       return ResponseEntity.status(400).body("параметр from не корректен");
@@ -139,45 +137,11 @@ public class ResourceController {
     @ApiResponse(responseCode = "401", description = "пользователь не авторизован"),
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
-  @GetMapping("/resource/search")
+  @GetMapping("/search")
   public ResponseEntity<?> search(@RequestParam String query) {
     if (query.contains(" ")) {
       return ResponseEntity.status(400).body("поисковый запрос не может содержать пробелов");
     }
     return ResponseEntity.ok(resourceService.search(query));
-  }
-
-  @Operation(summary = "Папки")
-  @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "данные о папке"),
-    @ApiResponse(responseCode = "400", description = "невалидный или отсутствующий путь"),
-    @ApiResponse(responseCode = "401", description = "пользователь не авторизован"),
-    @ApiResponse(responseCode = "404", description = "папка не существует"),
-    @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
-  })
-  @GetMapping("/directory")
-  public ResponseEntity<?> getDirectoryFilesInfo(@RequestParam String path) {
-    if (!pathValidator.isPathValid(path)) {
-      return ResponseEntity.status(400).body("параметр path не корректен");
-    }
-    return ResponseEntity.ok(resourceService.getAllDirectoryFilesInfo(path));
-  }
-
-  @Operation(summary = "Создание пустой папки")
-  @ApiResponses({
-    @ApiResponse(responseCode = "201", description = "папка создана"),
-    @ApiResponse(responseCode = "400", description = "невалидный или отсутствующий путь"),
-    @ApiResponse(responseCode = "401", description = "пользователь не авторизован"),
-    @ApiResponse(responseCode = "404", description = "Родительская папка не существует"),
-    @ApiResponse(responseCode = "409", description = "папка уже существует"),
-    @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
-  })
-  @PostMapping("/directory")
-  public ResponseEntity<?> createDirectory(@RequestParam String path) {
-    if (!pathValidator.isPathValid(path)) {
-      return ResponseEntity.status(400).body("параметр path не корректен");
-    }
-    resourceService.createDirectory(path);
-    return ResponseEntity.status(201).build();
   }
 }

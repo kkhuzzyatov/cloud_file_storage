@@ -3,7 +3,7 @@ import pytest
 
 
 # 201
-def test_create_directory(auth_api, resource_api):
+def test_create_directory(auth_api, directory_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -19,14 +19,14 @@ def test_create_directory(auth_api, resource_api):
     child = f"child_{uuid.uuid4().hex}"
 
     # Create parent directory
-    response = resource_api.create_directory(
+    response = directory_api.create_directory(
         path=parent,
         token=token,
     )
     assert response.status_code == 201
 
     # Create child directory
-    response = resource_api.create_directory(
+    response = directory_api.create_directory(
         path=f"{parent}/{child}",
         token=token,
     )
@@ -42,7 +42,7 @@ def test_create_directory(auth_api, resource_api):
         "documents/\0/folder",
     ],
 )
-def test_create_directory_invalid_path(auth_api, resource_api, path):
+def test_create_directory_invalid_path(auth_api, directory_api, path):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -54,7 +54,7 @@ def test_create_directory_invalid_path(auth_api, resource_api, path):
 
     token = response.json()["token"]
 
-    response = resource_api.create_directory(
+    response = directory_api.create_directory(
         path=path,
         token=token,
     )
@@ -63,8 +63,8 @@ def test_create_directory_invalid_path(auth_api, resource_api, path):
 
 
 # 401
-def test_create_directory_unauthorized(resource_api):
-    response = resource_api.create_directory(
+def test_create_directory_unauthorized(directory_api):
+    response = directory_api.create_directory(
         path="folder",
         token="invalid_token",
     )
@@ -73,7 +73,7 @@ def test_create_directory_unauthorized(resource_api):
 
 
 # 404
-def test_create_directory_parent_not_found(auth_api, resource_api):
+def test_create_directory_parent_not_found(auth_api, directory_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -85,7 +85,7 @@ def test_create_directory_parent_not_found(auth_api, resource_api):
 
     token = response.json()["token"]
 
-    response = resource_api.create_directory(
+    response = directory_api.create_directory(
         path=f"parent_{uuid.uuid4().hex}/child",
         token=token,
     )
@@ -94,7 +94,7 @@ def test_create_directory_parent_not_found(auth_api, resource_api):
 
 
 # 409
-def test_create_directory_already_exists(auth_api, resource_api):
+def test_create_directory_already_exists(auth_api, directory_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
 
@@ -108,13 +108,13 @@ def test_create_directory_already_exists(auth_api, resource_api):
 
     directory = f"folder_{uuid.uuid4().hex}"
 
-    response = resource_api.create_directory(
+    response = directory_api.create_directory(
         path=directory,
         token=token,
     )
     assert response.status_code == 201
 
-    response = resource_api.create_directory(
+    response = directory_api.create_directory(
         path=directory,
         token=token,
     )
