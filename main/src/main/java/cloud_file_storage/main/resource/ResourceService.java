@@ -1,7 +1,9 @@
 package cloud_file_storage.main.resource;
 
 import cloud_file_storage.main.controller.dto.ResourceInformationResponse;
+import cloud_file_storage.main.exception.DirectoryIsAlreadyExistException;
 import cloud_file_storage.main.exception.FileIsAlreadyExistException;
+import cloud_file_storage.main.exception.ResourceNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -146,6 +148,13 @@ public class ResourceService {
   }
 
   public void createDirectory(String path) {
+    if (mockResourceRepository.isDirectoryExist(path)) {
+      throw new DirectoryIsAlreadyExistException("Папка с таким именем уже существует");
+    }
+    String parentPath = getParentPath(path);
+    if (!mockResourceRepository.isDirectoryExist(parentPath)) {
+      throw new ResourceNotFoundException("Родительская папка не найдена");
+    }
     mockResourceRepository.createDirectory(removeTrailingSlash(path));
   }
 

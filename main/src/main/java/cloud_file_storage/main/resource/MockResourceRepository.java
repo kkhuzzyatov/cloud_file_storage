@@ -22,6 +22,11 @@ public class MockResourceRepository {
     return Files.exists(resourcePath) && Files.isRegularFile(resourcePath);
   }
 
+  public boolean isDirectoryExist(String path) {
+    Path directoryPath = resolvePath(path);
+    return Files.exists(directoryPath) && Files.isDirectory(directoryPath);
+  }
+
   public List<Resource> getAllResourcesOfDirectory(String path) {
     Path directory = resolvePath(path);
 

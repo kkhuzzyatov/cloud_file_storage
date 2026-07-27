@@ -137,6 +137,16 @@ class ApiResourceClient:
             },
             timeout=10,
         )
+        
+    def create_directory(self, path: str, token: str):
+        return requests.post(
+            DIRECTORY_URL,
+            params={"path": path},
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
 
     @staticmethod
     def _headers(token: str | None):

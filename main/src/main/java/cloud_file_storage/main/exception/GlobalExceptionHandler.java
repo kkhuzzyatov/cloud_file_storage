@@ -54,7 +54,19 @@ public class GlobalExceptionHandler {
         .addKeyValue("сообщение", ex.getMessage())
         .log("Ресурс не найден");
 
-    return buildResponse(ex, HttpStatus.NOT_FOUND, "Ресурс не найден");
+    return buildResponse(ex, HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  @ExceptionHandler(DirectoryIsAlreadyExistException.class)
+  public ResponseEntity<Map<String, String>> handleDirectoryIsAlreadyExistException(
+      DirectoryIsAlreadyExistException ex) {
+    log.atError()
+        .setCause(ex)
+        .addKeyValue("исключение", ex.getClass().getSimpleName())
+        .addKeyValue("сообщение", ex.getMessage())
+        .log("Папка с таким именем уже существует");
+
+    return buildResponse(ex, HttpStatus.CONFLICT, "Папка с таким именем уже существует");
   }
 
   @ExceptionHandler(FileIsAlreadyExistException.class)
@@ -238,7 +250,7 @@ public class GlobalExceptionHandler {
         .addKeyValue("сообщение", ex.getMessage())
         .log("Непредвиденная ошибка");
 
-    return buildResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    return buildResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Непредвиденная ошибка. Попробуйте позже");
   }
 
   private ResponseEntity<Map<String, String>> buildResponse(
