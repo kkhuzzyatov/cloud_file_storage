@@ -68,14 +68,9 @@ public class ResourceService {
   }
 
   public void move(String from, String to) {
-    String fromFolderPath = getParentPath(from);
-    String fromFileName = getFileName(from);
-
-    Resource resource = mockResourceRepository.getResource(fromFolderPath, fromFileName);
-
-    mockResourceRepository.deleteResource(fromFolderPath, fromFileName);
-
-    mockResourceRepository.createResource(to, resource);
+    Resource resource = getResource(from);
+    delete(from);
+    createResource(to, resource);
   }
 
   public void createResource(String path, Resource resource) {

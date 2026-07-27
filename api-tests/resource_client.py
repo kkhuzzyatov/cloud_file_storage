@@ -103,6 +103,19 @@ class ApiResourceClient:
             },
             timeout=10,
         )
+        
+    def move(self, from_path: str, to_path: str, token: str):
+        return requests.post(
+            f"{RESOURCE_URL}/move",
+            params={
+                "from": from_path,
+                "to": to_path,
+            },
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
 
     @staticmethod
     def _headers(token: str | None):
