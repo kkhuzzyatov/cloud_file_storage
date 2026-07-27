@@ -106,7 +106,7 @@ public class ResourceController {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
-    return ResponseEntity.ok(resourceConverter.convert(resourceService.getResource(path)));
+    return ResponseEntity.ok(resourceService.getResource(path));
   }
 
   @Operation(summary = "Переименование/перемещение ресурса")
