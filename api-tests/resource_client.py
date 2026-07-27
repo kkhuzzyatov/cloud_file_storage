@@ -116,6 +116,16 @@ class ApiResourceClient:
             },
             timeout=10,
         )
+    
+    def search(self, query: str, token: str):
+        return requests.get(
+            f"{RESOURCE_URL}/search",
+            params={"query": query},
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
 
     @staticmethod
     def _headers(token: str | None):

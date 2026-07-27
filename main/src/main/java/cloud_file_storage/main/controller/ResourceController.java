@@ -141,6 +141,9 @@ public class ResourceController {
   })
   @GetMapping("/resource/search")
   public ResponseEntity<?> search(@RequestParam String query) {
+    if (query.contains(" ")) {
+      return ResponseEntity.status(400).body("поисковый запрос не может содержать пробелов");
+    }
     return ResponseEntity.ok(resourceService.search(query));
   }
 
