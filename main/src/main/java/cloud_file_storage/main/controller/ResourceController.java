@@ -156,11 +156,11 @@ public class ResourceController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping("/directory")
-  public ResponseEntity<?> getDirectoryInfo(@RequestParam String path) {
+  public ResponseEntity<?> getDirectoryFilesInfo(@RequestParam String path) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
-    return ResponseEntity.ok(resourceService.getInfo(path));
+    return ResponseEntity.ok(resourceService.getAllDirectoryFilesInfo(path));
   }
 
   @Operation(summary = "Создание пустой папки")

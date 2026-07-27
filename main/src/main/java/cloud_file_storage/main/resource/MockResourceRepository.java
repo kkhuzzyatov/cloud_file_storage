@@ -14,22 +14,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MockResourceRepository {
 
-  private final ZipUtils zipUtils;
-
   @Value("${app.data-dir-path}")
   private String dataDir;
 
-  /** Checks if resource exists: dataDir/path/fileName */
   public boolean isResourceExisted(String path, String fileName) {
     Path resourcePath = resolvePath(path, fileName);
     return Files.exists(resourcePath) && Files.isRegularFile(resourcePath);
   }
 
-  /**
-   * Returns zipped content of all files inside the lowest directory. Example:
-   * path=folder1/folder2/folder3 result name=folder3 result bytes=zip of files inside folder3
-   */
-  public Resource getAllResourcesOfDirectory(String path) {
+  public List<Resource> getAllResourcesOfDirectory(String path) {
     Path directory = resolvePath(path);
 
     if (!Files.exists(directory) || !Files.isDirectory(directory)) {
@@ -52,17 +45,13 @@ public class MockResourceRepository {
                 .collect(Collectors.toList());
       }
 
-      return Resource.builder()
-          .name(directory.getFileName().toString())
-          .bytes(zipUtils.createZip(files))
-          .build();
+      return files;
 
     } catch (IOException e) {
-      throw new RuntimeException("Cannot create zip for directory: " + directory, e);
+      throw new RuntimeException("Cannot get files of directory: " + directory, e);
     }
   }
 
-  /** Returns a single file resource. */
   public Resource getResource(String path, String fileName) {
     Path file = resolvePath(path, fileName);
 
@@ -73,7 +62,6 @@ public class MockResourceRepository {
     return Resource.builder().name(fileName).bytes(readFile(file)).build();
   }
 
-  /** Creates directory and all missing parent directories. */
   public void createDirectory(String path) {
     Path directory = resolvePath(path);
 
@@ -84,7 +72,6 @@ public class MockResourceRepository {
     }
   }
 
-  /** Creates file and missing parent directories. */
   public void createResource(String path, Resource resource) {
     Path file = resolvePath(path, resource.name());
 
@@ -98,7 +85,6 @@ public class MockResourceRepository {
     }
   }
 
-  /** Deletes file but keeps parent directories. */
   public void deleteResource(String path, String fileName) {
     Path file = resolvePath(path, fileName);
 
@@ -113,7 +99,6 @@ public class MockResourceRepository {
     }
   }
 
-  /** Deletes directory recursively including all files and subdirectories. */
   public void deleteDirectory(String path) {
     Path directory = resolvePath(path);
 
@@ -129,10 +114,6 @@ public class MockResourceRepository {
     }
   }
 
-  /**
-   * Searches recursively in data directory. File is added if its name contains query. Key =
-   * relative path to resource from data directory.
-   */
   public Map<String, Resource> search(String query) {
     Path root = resolvePath();
 
@@ -165,7 +146,7 @@ public class MockResourceRepository {
     return result;
   }
 
-  private Path resolvePath(String... parts) {
+  public Path resolvePath(String... parts) {
     Path result = Paths.get(dataDir);
 
     for (String part : parts) {
@@ -173,6 +154,24 @@ public class MockResourceRepository {
     }
 
     return result.normalize();
+  }
+
+  public List<String> getSubDirectories(String path) {
+    Path directory = resolvePath(path);
+
+    if (!Files.exists(directory) || !Files.isDirectory(directory)) {
+      throw new ResourceNotFoundException("Directory not found: " + directory);
+    }
+
+    try (Stream<Path> stream = Files.list(directory)) {
+      return stream
+          .filter(Files::isDirectory)
+          .map(dir -> dir.getFileName().toString())
+          .sorted()
+          .toList();
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot get subdirectories of: " + directory, e);
+    }
   }
 
   private byte[] readFile(Path path) {

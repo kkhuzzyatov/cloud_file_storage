@@ -2,15 +2,20 @@ package cloud_file_storage.main.resource;
 
 import cloud_file_storage.main.controller.dto.ResourceInformationResponse;
 import cloud_file_storage.main.exception.FileIsAlreadyExistException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 public class ResourceService {
+
+  private final ZipUtils zipUtils;
 
   private final MockResourceRepository mockResourceRepository;
 
@@ -58,13 +63,52 @@ public class ResourceService {
 
   public Resource getResource(String path) {
     if (isDirectoryPath(path)) {
-      return mockResourceRepository.getAllResourcesOfDirectory(removeTrailingSlash(path));
+      Path directory = mockResourceRepository.resolvePath(path);
+      try {
+        return Resource.builder()
+            .name(directory.getFileName().toString())
+            .bytes(
+                zipUtils.createZip(
+                    mockResourceRepository.getAllResourcesOfDirectory(removeTrailingSlash(path))))
+            .build();
+      } catch (IOException e) {
+        throw new RuntimeException("Cannot create zip for directory: " + directory, e);
+      }
     }
 
     String folderPath = getParentPath(path);
     String fileName = getFileName(path);
 
     return mockResourceRepository.getResource(folderPath, fileName);
+  }
+
+  public List<ResourceInformationResponse> getAllDirectoryFilesInfo(String path) {
+    String normalizedPath = removeTrailingSlash(path);
+
+    List<ResourceInformationResponse> filesInfo =
+        mockResourceRepository.getAllResourcesOfDirectory(normalizedPath).stream()
+            .map(
+                resource ->
+                    ResourceInformationResponse.builder()
+                        .path(path + resource.name())
+                        .name(resource.name())
+                        .size(resource.bytes().length)
+                        .type("FILE")
+                        .build())
+            .toList();
+
+    List<ResourceInformationResponse> directoriesInfo =
+        mockResourceRepository.getSubDirectories(normalizedPath).stream()
+            .map(
+                dirName ->
+                    ResourceInformationResponse.builder()
+                        .path(path + dirName)
+                        .name(dirName)
+                        .type("DIRECTORY")
+                        .build())
+            .toList();
+
+    return Stream.concat(filesInfo.stream(), directoriesInfo.stream()).toList();
   }
 
   public void move(String from, String to) {
