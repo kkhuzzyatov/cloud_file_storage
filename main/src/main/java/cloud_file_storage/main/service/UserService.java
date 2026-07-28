@@ -3,7 +3,7 @@ package cloud_file_storage.main.service;
 import cloud_file_storage.main.exception.SessionNotFoundException;
 import cloud_file_storage.main.exception.UserAlreadyExistsException;
 import cloud_file_storage.main.exception.UserIsNotExistException;
-import cloud_file_storage.main.session.MockTokenRepository;
+import cloud_file_storage.main.session.TokenRepository;
 import cloud_file_storage.main.user.User;
 import cloud_file_storage.main.user.UserRepository;
 import java.util.Optional;
@@ -18,7 +18,7 @@ public class UserService {
 
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
-  private final MockTokenRepository mockTokenRepository;
+  private final TokenRepository tokenRepository;
 
   public String signUp(String username, String rawPassword) {
     if (userRepository.existsByUsername(username)) {
@@ -34,7 +34,7 @@ public class UserService {
     User userFromDb =
         userOptional.orElseThrow(() -> new UserIsNotExistException("внутрення ошибка"));
 
-    return mockTokenRepository.generate(userFromDb.getId()).toString();
+    return tokenRepository.generate(userFromDb.getId()).toString();
   }
 
   public String signIn(String username, String rawPassword) {
@@ -47,16 +47,15 @@ public class UserService {
       throw new IllegalArgumentException("неверный username или пароль");
     }
 
-    return mockTokenRepository.generate(user.getId()).toString();
+    return tokenRepository.generate(user.getId()).toString();
   }
 
   public void signOut(String token) {
-    mockTokenRepository.deleteToken(UUID.fromString(token.replaceFirst("^Bearer\\s+", "")));
+    tokenRepository.deleteToken(UUID.fromString(token.replaceFirst("^Bearer\\s+", "")));
   }
 
   public User me(String token) {
-    UUID userId =
-        mockTokenRepository.getUserId(UUID.fromString(token.replaceFirst("^Bearer\\s+", "")));
+    UUID userId = tokenRepository.getUserId(UUID.fromString(token.replaceFirst("^Bearer\\s+", "")));
     User user =
         userRepository
             .findById(userId)

@@ -17,7 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 @Component
 public class SessionFilter extends OncePerRequestFilter {
-  private final MockTokenRepository mockTokenRepository;
+  private final TokenRepository tokenRepository;
 
   @Override
   protected void doFilterInternal(
@@ -27,7 +27,7 @@ public class SessionFilter extends OncePerRequestFilter {
 
     if (header != null && header.startsWith("Bearer ")) {
       UUID userId =
-          mockTokenRepository.getUserId(UUID.fromString(header.replaceFirst("^Bearer\\s+", "")));
+          tokenRepository.getUserId(UUID.fromString(header.replaceFirst("^Bearer\\s+", "")));
       UsernamePasswordAuthenticationToken auth =
           new UsernamePasswordAuthenticationToken(
               userId, null, List.of(new SimpleGrantedAuthority("USER")));

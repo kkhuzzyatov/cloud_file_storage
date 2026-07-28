@@ -26,7 +26,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/api/auth/**")
                     .permitAll()
-                    .requestMatchers("/swagger-ui/**", "/api-docs/**", "/openapi.yml")
+                    .requestMatchers(
+                        "/swagger-ui/**", "/api-docs/**", "/openapi.yml", "/v3/api-docs")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

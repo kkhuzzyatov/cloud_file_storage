@@ -19,5 +19,13 @@ spring:
     enabled: true
     change-log: classpath:/migrations/master.xml
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 app:
   data-dir-path: data
+
+  token:
+    ttl: 7d
