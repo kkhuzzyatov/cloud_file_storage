@@ -15,8 +15,6 @@ def test_search_resource(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     folder = f"folder_{uuid.uuid4().hex}"
 
     file1 = f"report_{uuid.uuid4().hex}.txt"
@@ -28,8 +26,7 @@ def test_search_resource(auth_api, resource_api):
     response = resource_api.upload(
         path=folder,
         file_name=file1,
-        content=content1,
-        token=token,
+        content=content1
     )
     assert response.status_code == 201
 
@@ -37,13 +34,11 @@ def test_search_resource(auth_api, resource_api):
         path=folder,
         file_name=file2,
         content=content2,
-        token=token,
     )
     assert response.status_code == 201
 
     response = resource_api.search(
         query="report",
-        token=token,
     )
 
     assert response.status_code == 200
@@ -73,11 +68,8 @@ def test_search_invalid_query(auth_api, resource_api, query):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.search(
         query=query,
-        token=token,
     )
 
     assert response.status_code == 400
@@ -86,8 +78,7 @@ def test_search_invalid_query(auth_api, resource_api, query):
 # 401
 def test_search_unauthorized(resource_api):
     response = resource_api.search(
-        query="file",
-        token="invalid_token",
+        query="file"
     )
 
     assert response.status_code == 401

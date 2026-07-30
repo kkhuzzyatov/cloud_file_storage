@@ -14,8 +14,6 @@ def test_move_resource(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
 
@@ -29,23 +27,20 @@ def test_move_resource(auth_api, resource_api):
     response = resource_api.upload(
         path=from_folder,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
     assert response.status_code == 201
 
     # Move resource
     response = resource_api.move(
         from_path=from_path,
-        to_path=to_folder,
-        token=token,
+        to_path=to_folder
     )
     assert response.status_code == 200
 
     # Check resource exists in destination
     response = resource_api.get(
-        path=to_path,
-        token=token,
+        path=to_path
     )
 
     assert response.status_code == 200
@@ -87,12 +82,9 @@ def test_move_resource_invalid_path(
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.move(
         from_path=from_path,
-        to_path=to_path,
-        token=token,
+        to_path=to_path
     )
 
     assert response.status_code == 400
@@ -102,8 +94,7 @@ def test_move_resource_invalid_path(
 def test_move_resource_unauthorized(resource_api):
     response = resource_api.move(
         from_path="folder/file.txt",
-        to_path="folder2",
-        token="invalid_token",
+        to_path="folder2"
     )
 
     assert response.status_code == 401
@@ -122,12 +113,9 @@ def test_move_resource_not_found(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.move(
         from_path=f"folder_{uuid.uuid4().hex}/file.txt",
-        to_path=f"folder2_{uuid.uuid4().hex}",
-        token=token,
+        to_path=f"folder2_{uuid.uuid4().hex}"
     )
 
     assert response.status_code == 404
@@ -146,7 +134,6 @@ def test_move_resource_conflict(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
 
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
@@ -161,23 +148,20 @@ def test_move_resource_conflict(auth_api, resource_api):
     response = resource_api.upload(
         path=from_folder,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
     assert response.status_code == 201
 
     # Move resource
     response = resource_api.move(
         from_path=from_path,
-        to_path=to_folder,
-        token=token,
+        to_path=to_folder
     )
     assert response.status_code == 200
 
     # Check resource exists in destination
     response = resource_api.get(
-        path=to_path,
-        token=token,
+        path=to_path
     )
 
     assert response.status_code == 200
@@ -186,15 +170,13 @@ def test_move_resource_conflict(auth_api, resource_api):
     response = resource_api.upload(
         path=from_folder,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
     assert response.status_code == 201
 
     # Move resource
     response = resource_api.move(
         from_path=from_path,
-        to_path=to_folder,
-        token=token,
+        to_path=to_folder
     )
     assert response.status_code == 409

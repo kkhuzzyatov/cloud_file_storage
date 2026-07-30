@@ -1,5 +1,6 @@
 import uuid
 
+# 200
 def test_signin_success(auth_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
@@ -13,14 +14,7 @@ def test_signin_success(auth_api):
 
     assert response.status_code == 200
 
-    body = response.json()
-
-    assert "token" in body
-    assert isinstance(body["token"], str)
-
-    # UUID-токен
-    uuid.UUID(body["token"])
-    
+# 400
 def test_signin_wrong_password(auth_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"

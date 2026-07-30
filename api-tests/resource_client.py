@@ -8,125 +8,89 @@ load_dotenv()
 RESOURCE_URL = os.getenv("RESOURCE_URL")
 
 class ApiResourceClient:
+    def __init__(self, session: requests.Session):
+        self.session = session
 
-    def list(self, token: str | None = None):
-        return requests.get(
+    def list(self):
+        return self.session.get(
             RESOURCE_URL,
-            headers=self._headers(token),
             timeout=10,
         )
 
-    def delete(self, token: str | None = None):
-        return requests.delete(
+    def delete(self):
+        return self.session.delete(
             RESOURCE_URL,
-            headers=self._headers(token),
             timeout=10,
         )
 
-    def download(self, token: str | None = None):
-        return requests.get(
+    def download(self):
+        return self.session.get(
             f"{RESOURCE_URL}/download",
-            headers=self._headers(token),
             timeout=10,
         )
 
-    def move(self, token: str | None = None):
-        return requests.post(
+    def move(self):
+        return self.session.post(
             f"{RESOURCE_URL}/move",
-            headers=self._headers(token),
             timeout=10,
         )
 
-    def search(self, token: str | None = None):
-        return requests.get(
+    def search(self):
+        return self.session.get(
             f"{RESOURCE_URL}/search",
-            headers=self._headers(token),
             timeout=10,
         )
 
-    def create(self, token: str | None = None):
-        return requests.post(
+    def create(self):
+        return self.session.post(
             RESOURCE_URL,
-            headers=self._headers(token),
             timeout=10,
         )
         
-    def upload(self, path: str, file_name: str, content: bytes, token: str):
-        return requests.post(
+    def upload(self, path: str, file_name: str, content: bytes):
+        return self.session.post(
             RESOURCE_URL,
             params={"path": path},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
             files={
                 "file": (file_name, content, "text/plain"),
-            },
-            timeout=10,
+            }
         )
         
-    def get(self, path: str, token: str):
-        return requests.get(
+    def get(self, path: str):
+        return self.session.get(
             RESOURCE_URL,
-            params={"path": path},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
+            params={"path": path}
         )
         
-    def upload_without_body(self, path, token):
-        return requests.post(
+    def upload_without_body(self, path):
+        return self.session.post(
             RESOURCE_URL,
-            params={"path": path},
-            headers={"Authorization": f"Bearer {token}"},
-            timeout=10,
+            params={"path": path}
         )
         
-    def delete(self, path: str, token: str):
-        return requests.delete(
+    def delete(self, path: str):
+        return self.session.delete(
             RESOURCE_URL,
-            params={"path": path},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
+            params={"path": path}
         )
         
-    def download(self, path: str, token: str):
-        return requests.get(
+    def download(self, path: str):
+        return self.session.get(
             f"{RESOURCE_URL}/download",
-            params={"path": path},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
+            params={"path": path}
         )
         
-    def move(self, from_path: str, to_path: str, token: str):
-        return requests.post(
+    def move(self, from_path: str, to_path: str):
+        return self.session.post(
             f"{RESOURCE_URL}/move",
             params={
                 "from": from_path,
                 "to": to_path,
-            },
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
+            }
         )
     
-    def search(self, query: str, token: str):
-        return requests.get(
+    def search(self, query: str):
+        return self.session.get(
             f"{RESOURCE_URL}/search",
-            params={"query": query},
-            headers={
-                "Authorization": f"Bearer {token}",
-            },
-            timeout=10,
+            params={"query": query}
         )
-
-    @staticmethod
-    def _headers(token: str | None):
-        if token:
-            return {"Authorization": f"Bearer {token}"}
-        return {}

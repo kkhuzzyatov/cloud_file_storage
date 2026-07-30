@@ -9,15 +9,11 @@ USER_URL = os.getenv("USER_URL")
 
 
 class ApiUserClient:
+    def __init__(self, session: requests.Session):
+        self.session = session
 
-    def me(self, token: str | None = None):
-        headers = {}
-
-        if token is not None:
-            headers["Authorization"] = f"Bearer {token}"
-
-        return requests.get(
+    def me(self):
+        return self.session.get(
             f"{USER_URL}/me",
-            headers=headers,
             timeout=10,
         )

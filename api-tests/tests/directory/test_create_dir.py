@@ -13,22 +13,18 @@ def test_create_directory(auth_api, directory_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     parent = f"parent_{uuid.uuid4().hex}"
     child = f"child_{uuid.uuid4().hex}"
 
     # Create parent directory
     response = directory_api.create_directory(
-        path=parent,
-        token=token,
+        path=parent
     )
     assert response.status_code == 201
 
     # Create child directory
     response = directory_api.create_directory(
-        path=f"{parent}/{child}",
-        token=token,
+        path=f"{parent}/{child}"
     )
     assert response.status_code == 201
 
@@ -52,11 +48,8 @@ def test_create_directory_invalid_path(auth_api, directory_api, path):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = directory_api.create_directory(
-        path=path,
-        token=token,
+        path=path
     )
 
     assert response.status_code == 400
@@ -65,8 +58,7 @@ def test_create_directory_invalid_path(auth_api, directory_api, path):
 # 401
 def test_create_directory_unauthorized(directory_api):
     response = directory_api.create_directory(
-        path="folder",
-        token="invalid_token",
+        path="folder"
     )
 
     assert response.status_code == 401
@@ -83,11 +75,8 @@ def test_create_directory_parent_not_found(auth_api, directory_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = directory_api.create_directory(
-        path=f"parent_{uuid.uuid4().hex}/child",
-        token=token,
+        path=f"parent_{uuid.uuid4().hex}/child"
     )
 
     assert response.status_code == 404
@@ -104,19 +93,15 @@ def test_create_directory_already_exists(auth_api, directory_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     directory = f"folder_{uuid.uuid4().hex}"
 
     response = directory_api.create_directory(
-        path=directory,
-        token=token,
+        path=directory
     )
     assert response.status_code == 201
 
     response = directory_api.create_directory(
-        path=directory,
-        token=token,
+        path=directory
     )
 
     assert response.status_code == 409

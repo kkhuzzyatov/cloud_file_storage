@@ -14,8 +14,6 @@ def test_upload_file(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     # Generate random file
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
@@ -26,8 +24,7 @@ def test_upload_file(auth_api, resource_api):
     response = resource_api.upload(
         path=folder_name,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
 
     assert response.status_code == 201
@@ -45,7 +42,7 @@ def test_upload_file(auth_api, resource_api):
         "size": len(content),
         "type": "FILE",
     }
-    
+
 # 400
 def test_upload_without_body(auth_api, resource_api):
     username = f"user_{uuid.uuid4().hex}"
@@ -59,16 +56,13 @@ def test_upload_without_body(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
-    # Send request with auth token but without file body
+    # Send request
     response = resource_api.upload_without_body(
-        path=f"folder_{uuid.uuid4().hex}",
-        token=token,
+        path=f"folder_{uuid.uuid4().hex}"
     )
 
     assert response.status_code == 400
-    
+
 # 400
 @pytest.mark.parametrize(
     "path",
@@ -89,13 +83,10 @@ def test_upload_invalid_path(auth_api, resource_api, path):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.upload(
         path=path,
         file_name=f"{uuid.uuid4().hex}.txt",
-        content=b"test",
-        token=token,
+        content=b"test"
     )
     assert response.status_code == 400
 
@@ -104,12 +95,11 @@ def test_upload_unauthorized(resource_api):
     response = resource_api.upload(
         path="folder",
         file_name="file.txt",
-        content=b"test",
-        token="invalid_token",
+        content=b"test"
     )
     assert response.status_code == 401
 
-# 409       
+# 409
 def test_upload_duplicate_file(auth_api, resource_api):
     username = f"user_{uuid.uuid4().hex}"
     password = "password123"
@@ -122,8 +112,6 @@ def test_upload_duplicate_file(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     # Генерируем файл
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
@@ -135,8 +123,7 @@ def test_upload_duplicate_file(auth_api, resource_api):
     response = resource_api.upload(
         path=folder_name,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
 
     assert response.status_code == 201
@@ -145,8 +132,7 @@ def test_upload_duplicate_file(auth_api, resource_api):
     response = resource_api.upload(
         path=folder_name,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
 
     assert response.status_code == 409

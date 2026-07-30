@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +27,8 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping("/me")
-  public ResponseEntity<UserResponse> getCurrentUser(@RequestHeader("Authorization") String token) {
-    User user = userService.me(token);
+  public ResponseEntity<UserResponse> getCurrentUser(HttpSession session) {
+    User user = userService.me(UUID.fromString((String) session.getAttribute("userId")));
     UserResponse userResponse =
         UserResponse.builder().id(user.getId()).username(user.getUsername()).build();
     return ResponseEntity.ok(userResponse);

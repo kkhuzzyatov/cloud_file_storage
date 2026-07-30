@@ -15,8 +15,6 @@ def test_download_resource(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     # Generate file
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
@@ -28,16 +26,14 @@ def test_download_resource(auth_api, resource_api):
     response = resource_api.upload(
         path=folder_name,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
 
     assert response.status_code == 201
 
     # Download file
     response = resource_api.download(
-        path=path,
-        token=token,
+        path=path
     )
 
     assert response.status_code == 200
@@ -71,11 +67,8 @@ def test_download_invalid_path(auth_api, resource_api, path):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.download(
-        path=path,
-        token=token,
+        path=path
     )
 
     assert response.status_code == 400
@@ -84,8 +77,7 @@ def test_download_invalid_path(auth_api, resource_api, path):
 # 401
 def test_download_resource_unauthorized(resource_api):
     response = resource_api.download(
-        path="folder/file.txt",
-        token="invalid_token",
+        path="folder/file.txt"
     )
 
     assert response.status_code == 401
@@ -104,11 +96,8 @@ def test_download_resource_not_found(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.download(
-        path=f"folder_{uuid.uuid4().hex}/file.txt",
-        token=token,
+        path=f"folder_{uuid.uuid4().hex}/file.txt"
     )
 
     assert response.status_code == 404

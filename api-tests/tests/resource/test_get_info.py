@@ -14,8 +14,6 @@ def test_get_resource_info(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     # Generate file
     file_name = f"{uuid.uuid4().hex}.txt"
     content = uuid.uuid4().hex.encode("utf-8")
@@ -27,15 +25,13 @@ def test_get_resource_info(auth_api, resource_api):
     response = resource_api.upload(
         path=folder_name,
         file_name=file_name,
-        content=content,
-        token=token,
+        content=content
     )
     assert response.status_code == 201
 
     # Get resource information
     response = resource_api.get(
-        path=(folder_name + "/" + file_name),
-        token=token,
+        path=(folder_name + "/" + file_name)
     )
 
     assert response.status_code == 200
@@ -48,7 +44,7 @@ def test_get_resource_info(auth_api, resource_api):
         "size": len(content),
         "type": "FILE",
     }
-    
+
 # 400
 @pytest.mark.parametrize(
     "path",
@@ -69,25 +65,21 @@ def test_upload_invalid_path(auth_api, resource_api, path):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     response = resource_api.upload(
         path=path,
         file_name=f"{uuid.uuid4().hex}.txt",
-        content=b"test",
-        token=token,
+        content=b"test"
     )
 
     assert response.status_code == 400
-    
+
 # 401
 def test_get_resource_info_unauthorized(resource_api):
     response = resource_api.get(
-        path="folder/file.txt",
-        token="invalid_token",
+        path="folder/file.txt"
     )
     assert response.status_code == 401
-    
+
 # 404
 def test_get_resource_info_not_found(auth_api, resource_api):
     username = f"user_{uuid.uuid4().hex}"
@@ -101,12 +93,9 @@ def test_get_resource_info_not_found(auth_api, resource_api):
     response = auth_api.signin(username, password)
     assert response.status_code == 200
 
-    token = response.json()["token"]
-
     # Request information for a non-existent resource
     response = resource_api.get(
-        path=f"folder_{uuid.uuid4().hex}/file.txt",
-        token=token,
+        path=f"folder_{uuid.uuid4().hex}/file.txt"
     )
 
     assert response.status_code == 404

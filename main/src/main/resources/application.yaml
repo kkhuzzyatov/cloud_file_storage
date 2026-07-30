@@ -1,5 +1,9 @@
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        name: SESSION
 
 spring:
   application:
@@ -18,6 +22,9 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/migrations/master.xml
+
+  session:
+    store-type: redis
 
   data:
     redis:

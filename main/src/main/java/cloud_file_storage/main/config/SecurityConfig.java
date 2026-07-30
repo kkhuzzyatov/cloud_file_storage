@@ -1,6 +1,5 @@
 package cloud_file_storage.main.config;
 
-import cloud_file_storage.main.session.SessionFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,27 +10,24 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-  private final SessionFilter sessionFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) {
     http.csrf(csrf -> csrf.disable())
-        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/api/auth/**")
+                auth.requestMatchers("/api/auth/sign-up", "/api/auth/sign-in")
                     .permitAll()
                     .requestMatchers(
                         "/swagger-ui/**", "/api-docs/**", "/openapi.yml", "/v3/api-docs")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .addFilterBefore(sessionFilter, UsernamePasswordAuthenticationFilter.class)
         .exceptionHandling(
             ex ->
                 ex.authenticationEntryPoint(
