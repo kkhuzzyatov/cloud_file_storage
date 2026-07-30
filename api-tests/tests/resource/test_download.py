@@ -38,13 +38,7 @@ def test_download_resource(auth_api, resource_api):
 
     assert response.status_code == 200
 
-    # Check downloaded file equals uploaded content
-    body = response.json()
-
-    downloaded_content = base64.b64decode(body["bytes"])
-
-    assert downloaded_content == content
-    assert body["name"] == file_name
+    assert response.content == content
 
 
 # 400
