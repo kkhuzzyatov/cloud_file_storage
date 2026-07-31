@@ -99,3 +99,17 @@ def test_get_resource_info_not_found(auth_api, resource_api):
     )
 
     assert response.status_code == 404
+
+def test_get_resource_other_user_forbidden(create_authenticated_clients):
+    _, owner, _ = create_authenticated_clients()
+
+    folder = f"folder_{uuid.uuid4().hex}"
+    file = f"{uuid.uuid4().hex}.txt"
+
+    assert owner.upload(folder, file, b"test").status_code == 201
+
+    _, attacker, _ = create_authenticated_clients()
+
+    response = attacker.get(f"{folder}/{file}")
+
+    assert response.status_code == 404

@@ -31,7 +31,7 @@ public class ResourceService {
       String normalizedPath = removeTrailingSlash(path);
 
       return ResourceInformationResponse.builder()
-          .path(normalizedPath + "/")
+          .path(concatExceptFirst(normalizedPath.split("/")) + "/")
           .name(getLastPart(normalizedPath))
           .type("DIRECTORY")
           .build();
@@ -44,7 +44,7 @@ public class ResourceService {
     Resource resource = mockResourceRepository.getResource(folderPath, fileName);
 
     return ResourceInformationResponse.builder()
-        .path(path)
+        .path(concatExceptFirst(path.split("/")))
         .name(fileName)
         .size(resource.bytes().length)
         .type("FILE")
@@ -92,7 +92,7 @@ public class ResourceService {
             .map(
                 resource ->
                     ResourceInformationResponse.builder()
-                        .path(path + resource.name())
+                        .path(concatExceptFirst((path + "/" + resource.name()).split("/")))
                         .name(resource.name())
                         .size(resource.bytes().length)
                         .type("FILE")
@@ -104,7 +104,7 @@ public class ResourceService {
             .map(
                 dirName ->
                     ResourceInformationResponse.builder()
-                        .path(path + dirName)
+                        .path(concatExceptFirst((path + "/" + dirName).split("/")))
                         .name(dirName)
                         .type("DIRECTORY")
                         .build())
@@ -127,17 +127,17 @@ public class ResourceService {
     mockResourceRepository.createResource(path, resource);
   }
 
-  public List<ResourceInformationResponse> search(String query) {
+  public List<ResourceInformationResponse> search(String userId, String query) {
     List<ResourceInformationResponse> result = new ArrayList<>();
 
-    Map<String, Resource> resources = mockResourceRepository.search(query);
+    Map<String, Resource> resources = mockResourceRepository.search(userId, query);
 
     for (String path : resources.keySet()) {
       Resource resource = resources.get(path);
 
       result.add(
           ResourceInformationResponse.builder()
-              .path(path)
+              .path(concatExceptFirst(path.split("/")))
               .name(resource.name())
               .size(resource.bytes().length)
               .type("FILE")
@@ -198,5 +198,12 @@ public class ResourceService {
     }
 
     return path.substring(index + 1);
+  }
+
+  private String concatExceptFirst(String[] array) {
+    if (array == null || array.length <= 1) {
+      return "";
+    }
+    return String.join("/", java.util.Arrays.copyOfRange(array, 1, array.length));
   }
 }

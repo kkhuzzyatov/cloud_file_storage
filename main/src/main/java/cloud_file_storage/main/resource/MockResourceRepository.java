@@ -119,7 +119,7 @@ public class MockResourceRepository {
     }
   }
 
-  public Map<String, Resource> search(String query) {
+  public Map<String, Resource> search(String userId, String query) {
     Path root = resolvePath();
 
     if (!Files.exists(root)) {
@@ -136,12 +136,14 @@ public class MockResourceRepository {
               file -> {
                 String relativePath = root.relativize(file).toString().replace("\\", "/");
 
-                result.put(
-                    relativePath,
-                    Resource.builder()
-                        .name(file.getFileName().toString())
-                        .bytes(readFile(file))
-                        .build());
+                if (relativePath.contains(userId)) {
+                  result.put(
+                      relativePath,
+                      Resource.builder()
+                          .name(file.getFileName().toString())
+                          .bytes(readFile(file))
+                          .build());
+                }
               });
 
     } catch (IOException e) {

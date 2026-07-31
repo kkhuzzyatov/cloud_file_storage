@@ -96,3 +96,20 @@ def test_get_directory_not_found(auth_api, directory_api):
     )
 
     assert response.status_code == 404
+
+def test_directory_other_user(create_authenticated_clients):
+    _, owner_resource, _ = create_authenticated_clients()
+
+    folder = f"folder_{uuid.uuid4().hex}"
+
+    owner_resource.upload(
+        folder,
+        "file.txt",
+        b"test",
+    )
+
+    _, _, attacker_directory = create_authenticated_clients()
+
+    response = attacker_directory.directory(folder)
+
+    assert response.status_code == 404

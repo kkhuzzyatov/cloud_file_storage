@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/resource")
 @RequiredArgsConstructor
 @Tag(name = "Resource", description = "Управление ресурсами")
+@Slf4j
 public class ResourceController {
   private final ResourceService resourceService;
   private final PathValidator pathValidator;
@@ -33,10 +36,12 @@ public class ResourceController {
   })
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> upload(
-      @RequestParam String path, @RequestParam("file") MultipartFile file) throws IOException {
+      @RequestParam String path, @RequestParam("file") MultipartFile file, HttpSession session)
+      throws IOException {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр пути не корректен");
     }
+    path = session.getAttribute("userId") + "/" + path;
     byte[] bytes = file.getBytes();
     String name = file.getOriginalFilename();
     String[] nameParts = name.split("/");
@@ -49,7 +54,7 @@ public class ResourceController {
     Resource resource = new Resource(name, bytes);
     ResourceInformationResponse resourceInformationResponse =
         ResourceInformationResponse.builder()
-            .path(path)
+            .path(concatExceptFirst(path.split("/")))
             .name(name)
             .size(bytes.length)
             .type("FILE")
@@ -67,10 +72,11 @@ public class ResourceController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping
-  public ResponseEntity<?> getInfo(@RequestParam String path) {
+  public ResponseEntity<?> getInfo(@RequestParam String path, HttpSession session) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
+    path = session.getAttribute("userId") + "/" + path;
     return ResponseEntity.ok(resourceService.getInfo(path));
   }
 
@@ -83,10 +89,11 @@ public class ResourceController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @DeleteMapping
-  public ResponseEntity<?> delete(@RequestParam String path) {
+  public ResponseEntity<?> delete(@RequestParam String path, HttpSession session) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
+    path = session.getAttribute("userId") + "/" + path;
     resourceService.delete(path);
     return ResponseEntity.noContent().build();
   }
@@ -100,10 +107,11 @@ public class ResourceController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping("/download")
-  public ResponseEntity<?> download(@RequestParam String path) {
+  public ResponseEntity<?> download(@RequestParam String path, HttpSession session) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
+    path = session.getAttribute("userId") + "/" + path;
     return ResponseEntity.ok(resourceService.getResource(path).bytes());
   }
 
@@ -117,13 +125,16 @@ public class ResourceController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @PostMapping("/move")
-  public ResponseEntity<?> move(@RequestParam String from, @RequestParam String to) {
+  public ResponseEntity<?> move(
+      @RequestParam String from, @RequestParam String to, HttpSession session) {
     if (!pathValidator.isPathValid(from)) {
       return ResponseEntity.status(400).body("параметр from не корректен");
     }
     if (!pathValidator.isPathValid(to)) {
       return ResponseEntity.status(400).body("параметр to не корректен");
     }
+    from = session.getAttribute("userId") + "/" + from;
+    to = session.getAttribute("userId") + "/" + to;
     resourceService.move(from, to);
     return ResponseEntity.status(200).build();
   }
@@ -138,10 +149,18 @@ public class ResourceController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping("/search")
-  public ResponseEntity<?> search(@RequestParam String query) {
+  public ResponseEntity<?> search(@RequestParam String query, HttpSession session) {
     if (query.contains(" ")) {
       return ResponseEntity.status(400).body("поисковый запрос не может содержать пробелов");
     }
-    return ResponseEntity.ok(resourceService.search(query));
+    return ResponseEntity.ok(
+        resourceService.search((String) session.getAttribute("userId"), query));
+  }
+
+  private String concatExceptFirst(String[] array) {
+    if (array == null || array.length <= 1) {
+      return "";
+    }
+    return String.join("/", java.util.Arrays.copyOfRange(array, 1, array.length));
   }
 }

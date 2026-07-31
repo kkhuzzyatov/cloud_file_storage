@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +27,11 @@ public class DirectoryController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @GetMapping
-  public ResponseEntity<?> getDirectoryFilesInfo(@RequestParam String path) {
+  public ResponseEntity<?> getDirectoryFilesInfo(@RequestParam String path, HttpSession session) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
+    path = session.getAttribute("userId") + "/" + path;
     return ResponseEntity.ok(resourceService.getAllDirectoryFilesInfo(path));
   }
 
@@ -43,10 +45,11 @@ public class DirectoryController {
     @ApiResponse(responseCode = "500", description = "неизвестная ошибка")
   })
   @PostMapping
-  public ResponseEntity<?> createDirectory(@RequestParam String path) {
+  public ResponseEntity<?> createDirectory(@RequestParam String path, HttpSession session) {
     if (!pathValidator.isPathValid(path)) {
       return ResponseEntity.status(400).body("параметр path не корректен");
     }
+    path = session.getAttribute("userId") + "/" + path;
     resourceService.createDirectory(path);
     return ResponseEntity.status(201).build();
   }

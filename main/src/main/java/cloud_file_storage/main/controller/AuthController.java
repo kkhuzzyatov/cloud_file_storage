@@ -2,6 +2,7 @@ package cloud_file_storage.main.controller;
 
 import cloud_file_storage.main.controller.dto.AuthRequest;
 import cloud_file_storage.main.controller.dto.MessageResponse;
+import cloud_file_storage.main.resource.ResourceService;
 import cloud_file_storage.main.service.UserService;
 import cloud_file_storage.main.user.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Auth", description = "Регистрация и авторизация")
 public class AuthController {
   private final UserService userService;
+  private final ResourceService resourceService;
 
   @Operation(summary = "Регистрация")
   @ApiResponses({
@@ -40,7 +42,8 @@ public class AuthController {
   })
   @PostMapping("/sign-up")
   public ResponseEntity<?> signUp(@Valid @RequestBody AuthRequest authRequest) {
-    userService.signUp(authRequest.username(), authRequest.password());
+    User user = userService.signUp(authRequest.username(), authRequest.password());
+    resourceService.createDirectory(user.getId().toString());
     return ResponseEntity.status(201)
         .body(MessageResponse.builder().message("User is created").build());
   }

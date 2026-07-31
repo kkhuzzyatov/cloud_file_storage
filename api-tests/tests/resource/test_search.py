@@ -49,6 +49,23 @@ def test_search_resource(auth_api, resource_api):
 
     assert any(resource["path"] == expected_path for resource in body)
 
+def test_search_does_not_return_other_user_resources(create_authenticated_clients):
+    _, owner, _ = create_authenticated_clients()
+
+    folder = f"folder_{uuid.uuid4().hex}"
+    file = f"report_{uuid.uuid4().hex}.txt"
+
+    owner.upload(folder, file, b"secret")
+
+    _, attacker, _ = create_authenticated_clients()
+
+    response = attacker.search("report")
+
+    assert response.status_code == 200
+
+    body = response.json()
+
+    assert all(resource["name"] != file for resource in body)
 
 # 400
 @pytest.mark.parametrize(

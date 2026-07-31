@@ -18,7 +18,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
 
-  public void signUp(String username, String rawPassword) {
+  public User signUp(String username, String rawPassword) {
     if (userRepository.existsByUsername(username)) {
       throw new UserAlreadyExistsException("пользователь с таким username уже существует");
     }
@@ -29,8 +29,7 @@ public class UserService {
     userRepository.save(user);
     Optional<User> userOptional = userRepository.findByUsername(username);
 
-    User userFromDb =
-        userOptional.orElseThrow(() -> new UserIsNotExistException("внутрення ошибка"));
+    return userOptional.orElseThrow(() -> new UserIsNotExistException("внутрення ошибка"));
   }
 
   public User signIn(String username, String rawPassword) {

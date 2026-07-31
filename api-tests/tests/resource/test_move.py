@@ -120,6 +120,22 @@ def test_move_resource_not_found(auth_api, resource_api):
 
     assert response.status_code == 404
 
+def test_move_other_user_resource(create_authenticated_clients):
+    _, owner, _ = create_authenticated_clients()
+
+    folder = f"folder_{uuid.uuid4().hex}"
+    file = f"{uuid.uuid4().hex}.txt"
+
+    owner.upload(folder, file, b"secret")
+
+    _, attacker, _ = create_authenticated_clients()
+
+    response = attacker.move(
+        from_path=f"{folder}/{file}",
+        to_path="another_folder",
+    )
+
+    assert response.status_code == 404
 
 # 409
 def test_move_resource_conflict(auth_api, resource_api):
